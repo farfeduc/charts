@@ -87,7 +87,7 @@ The following table lists the configurable parameters of the Traefik chart and t
 | ------------------------------- | -------------------------------------------------------------------- | ----------------------------------------- |
 | `fullnameOverride`              | Override the full resource names                                     | `{release-name}-traefik (or traefik if release-name is traefik`|
 | `image`                         | Traefik image name                                                   | `traefik`                                 |
-| `imageTag`                      | The version of the official Traefik image to use                     | `1.5.4`                                  |
+| `imageTag`                      | The version of the official Traefik image to use                     | `1.6`                                     |
 | `serviceType`                   | A valid Kubernetes service type                                      | `LoadBalancer`                            |
 | `loadBalancerIP`                | An available static IP you have reserved on your cloud platform      | None                                      |
 | `loadBalancerSourceRanges`      | List of IP CIDRs allowed access to load balancer (if supported)      | None                                      |
@@ -118,6 +118,9 @@ The following table lists the configurable parameters of the Traefik chart and t
 | `acme.email`                    | Email address to be used in certificates obtained from Let's Encrypt | `admin@example.com`                       |
 | `acme.staging`                  | Whether to get certs from Let's Encrypt's staging environment        | `true`                                    |
 | `acme.logging`                  | Display debug log messages from the ACME client library              | `false`                                   |
+| `acme.domains.enabled`          | Enable certificate creation by default for specific domain           | `false`                                   |
+| `acme.domains.main`             | Main domain name of the generated certificate                        | `*.example.com`                           |
+| `acme.domains.sans`             | List of alternative subject name to give to the certificate          | `[]`                                      |
 | `acme.persistence.enabled`      | Create a volume to store ACME certs (if ACME is enabled)             | `true`                                    |
 | `acme.persistence.annotations`  | PVC annotations                                                      | `{}`                                      |
 | `acme.persistence.storageClass` | Type of `StorageClass` to request-- will be cluster-specific         | `nil` (uses alpha storage class annotation) |
@@ -216,6 +219,26 @@ acme:
     name:  # name of the dns provider to use
     $name: # the configuration of the dns provider. See the following section for an example
       # variables that the specific dns provider requires
+```
+
+### Let's Encrypt wildcard certificate
+
+To obtain an ACME (Let's Encrypt) wildcard certificate you must use a DNS challenge as explained above.
+Then you need to specify the wildcard domain name in the `acme.domains` section like this :
+
+```yaml
+acme:
+  enabled: true
+  challengeType: "dns-01"
+  dnsProvider:
+    name:  # name of the dns provider to use
+    $name: # the configuration of the dns provider. See the following section for an example
+      # variables that the specific dns provider requires
+  domains:
+    enabled: true
+    main: "*.example.com" # name of the wildcard domain name for the certificate
+    sans:
+      - "example.com" # OPTIONAL: Alternative name(s) for the certificate, if you want the same certificate for the root of the domain name for example
 ```
 
 #### Example: AWS Route 53
